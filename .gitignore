@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.venv/
+venv/
+.DS_Store
+data/subscribers.json
+data/last_newsletter.html
+data/logs/
+data/newsletters/

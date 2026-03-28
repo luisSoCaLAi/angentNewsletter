@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Newsletter Agent — Reference Guide</title>
+  <style>
+    /* ── Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #0070C0;
+      --blue-dark: #004F8B;
+      --black: #111111;
+      --gray: #6B7280;
+      --gray-light: #F3F4F6;
+      --gray-border: #E5E7EB;
+      --green: #16A34A;
+      --orange: #D97706;
+      --red: #DC2626;
+      --white: #FFFFFF;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 13px;
+      color: var(--black);
+      background: var(--white);
+      line-height: 1.6;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 52px;
+    }
+
+    /* ── Cover ── */
+    .cover {
+      text-align: center;
+      padding: 60px 0 48px;
+      border-bottom: 3px solid var(--blue);
+      margin-bottom: 48px;
+    }
+    .cover-logo {
+      display: inline-block;
+      background: var(--blue);
+      color: var(--white);
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      margin-bottom: 28px;
+    }
+    .cover h1 {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--black);
+      margin-bottom: 8px;
+    }
+    .cover .subtitle {
+      font-size: 15px;
+      color: var(--gray);
+      margin-bottom: 28px;
+    }
+    .cover-meta {
+      display: inline-flex;
+      gap: 24px;
+      background: var(--gray-light);
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 12px;
+      color: var(--gray);
+    }
+    .cover-meta span strong { color: var(--black); }
+
+    /* ── Section headers ── */
+    h2 {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--blue-dark);
+      margin: 36px 0 14px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--blue);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h2 .num {
+      background: var(--blue);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--black);
+      margin: 20px 0 8px;
+    }
+
+    p { margin-bottom: 10px; }
+
+    /* ── Pipeline diagram ── */
+    .pipeline {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin: 20px 0;
+      border: 1px solid var(--gray-border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .pipe-step {
+      flex: 1;
+      padding: 16px 12px;
+      text-align: center;
+      border-right: 1px solid var(--gray-border);
+      position: relative;
+    }
+    .pipe-step:last-child { border-right: none; }
+    .pipe-step::after {
+      content: '→';
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: var(--gray);
+      z-index: 1;
+    }
+    .pipe-step:last-child::after { display: none; }
+    .pipe-icon { font-size: 22px; margin-bottom: 6px; }
+    .pipe-label { font-size: 11px; font-weight: 700; color: var(--black); }
+    .pipe-sub { font-size: 10px; color: var(--gray); margin-top: 3px; }
+    .pipe-step.blue { background: #EBF5FB; }
+
+    /* ── Schedule diagram ── */
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 16px 0;
+    }
+    .sched-card {
+      border: 1px solid var(--gray-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .sched-header {
+      background: var(--blue);
+      color: var(--white);
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sched-body { padding: 12px 14px; }
+    .sched-body p { font-size: 12px; margin-bottom: 6px; color: var(--black); }
+    .sched-body p:last-child { margin-bottom: 0; }
+    .sched-body strong { color: var(--blue-dark); }
+
+    /* ── Code blocks ── */
+    pre, code {
+      font-family: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+    }
+    code {
+      background: var(--gray-light);
+      border: 1px solid var(--gray-border);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 11.5px;
+      color: #BE185D;
+    }
+    pre {
+      background: #1E293B;
+      color: #E2E8F0;
+      padding: 16px 18px;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.7;
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+    pre .comment { color: #64748B; }
+    pre .cmd { color: #7DD3FC; }
+    pre .flag { color: #86EFAC; }
+    pre .out { color: #FCD34D; }
+
+    /* ── Command table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 12px;
+    }
+    thead tr { background: var(--blue); color: var(--white); }
+    thead th { padding: 9px 12px; text-align: left; font-weight: 600; }
+    tbody tr:nth-child(even) { background: var(--gray-light); }
+    tbody td { padding: 9px 12px; border-bottom: 1px solid var(--gray-border); vertical-align: top; }
+    tbody td:first-child { font-family: 'Cascadia Code', Consolas, monospace; font-size: 11px; color: #BE185D; white-space: nowrap; }
+    tbody td:last-child { color: var(--gray); }
+
+    /* ── Callout boxes ── */
+    .callout {
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin: 12px 0;
+      font-size: 12px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .callout.info { background: #EBF5FB; border-left: 4px solid var(--blue); }
+    .callout.tip { background: #F0FDF4; border-left: 4px solid var(--green); }
+    .callout.warn { background: #FFFBEB; border-left: 4px solid var(--orange); }
+
+    /* ── File tree ── */
+    .file-tree {
+      background: var(--gray-light);
+      border: 1px solid var(--gray-border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-family: 'Cascadia Code', Consolas, monospace;
+      font-size: 11.5px;
+      line-height: 2;
+    }
+    .file-tree .dir { color: var(--blue-dark); font-weight: 700; }
+    .file-tree .file { color: var(--black); }
+    .file-tree .note { color: var(--gray); font-style: italic; }
+
+    /* ── Env var table ── */
+    .env-table td:nth-child(2) { font-family: Consolas, monospace; font-size: 11px; color: #BE185D; }
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .badge.req { background: #FEE2E2; color: var(--red); }
+    .badge.opt { background: #F0FDF4; color: var(--green); }
+
+    /* ── Footer ── */
+    .doc-footer {
+      margin-top: 48px;
+      padding-top: 20px;
+      border-top: 1px solid var(--gray-border);
+      font-size: 11px;
+      color: var(--gray);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .doc-footer a { color: var(--blue); text-decoration: none; }
+
+    /* ── Print ── */
+    @media print {
+      body { padding: 0; max-width: 100%; font-size: 12px; }
+      h2 { break-before: auto; }
+      .pipeline { break-inside: avoid; }
+      .schedule-grid { break-inside: avoid; }
+      pre { break-inside: avoid; }
+      table { break-inside: avoid; }
+      .callout { break-inside: avoid; }
+      @page { margin: 1.8cm 2cm; size: letter; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-logo">SoCal AI Solutions</div>
+  <h1>Weekly Newsletter Agent</h1>
+  <p class="subtitle">Reference Guide — How it works, how to run it, and how to manage subscribers</p>
+  <div class="cover-meta">
+    <span><strong>Version:</strong> 1.0</span>
+    <span><strong>Updated:</strong> March 2026</span>
+    <span><strong>Location:</strong> Desktop/newsletter-agent</span>
+    <span><strong>Stack:</strong> Python · Claude API · Resend · Netlify</span>
+  </div>
+</div>
+
+
+<!-- 1. OVERVIEW -->
+<h2><span class="num">1</span> What This Agent Does</h2>
+
+<p>The Newsletter Agent is a fully automated Python program that researches the latest AI news, writes a polished HTML email, and sends it to all active subscribers — every Tuesday morning at 9:00 AM, with no manual intervention required.</p>
+
+<div class="pipeline">
+  <div class="pipe-step blue">
+    <div class="pipe-icon">📋</div>
+    <div class="pipe-label">Sync Subscribers</div>
+    <div class="pipe-sub">Pull from Netlify Forms<br/>update local cache</div>
+  </div>
+  <div class="pipe-step">
+    <div class="pipe-icon">🔍</div>
+    <div class="pipe-label">Research Topics</div>
+    <div class="pipe-sub">Claude + web search<br/>finds top 3 AI stories</div>
+  </div>
+  <div class="pipe-step">
+    <div class="pipe-icon">✍️</div>
+    <div class="pipe-label">Write Newsletter</div>
+    <div class="pipe-sub">Claude drafts HTML<br/>email + subject line</div>
+  </div>
+  <div class="pipe-step blue">
+    <div class="pipe-icon">📨</div>
+    <div class="pipe-label">Send via Resend</div>
+    <div class="pipe-sub">Delivered to all<br/>active subscribers</div>
+  </div>
+</div>
+
+
+<!-- 2. SCHEDULE -->
+<h2><span class="num">2</span> Automated Schedule</h2>
+
+<p>Two Windows Task Scheduler tasks keep the agent running automatically. Both are registered under your user account and require no manual action once set up.</p>
+
+<div class="schedule-grid">
+  <div class="sched-card">
+    <div class="sched-header">📅 Daily Subscriber Sync</div>
+    <div class="sched-body">
+      <p><strong>Task Name:</strong> SoCal AI Newsletter - Daily Sync</p>
+      <p><strong>Runs:</strong> Every day at <strong>8:00 AM</strong></p>
+      <p><strong>Script:</strong> <code>run_sync.bat</code></p>
+      <p><strong>Log:</strong> <code>data/logs/sync.log</code></p>
+      <p>Pulls new subscriber form submissions from Netlify and updates the local <code>subscribers.json</code> cache. Runs one hour before the newsletter send so the list is always current.</p>
+    </div>
+  </div>
+  <div class="sched-card">
+    <div class="sched-header">📰 Weekly Newsletter Send</div>
+    <div class="sched-body">
+      <p><strong>Task Name:</strong> SoCal AI Newsletter</p>
+      <p><strong>Runs:</strong> Every <strong>Tuesday at 9:00 AM</strong></p>
+      <p><strong>Script:</strong> <code>run_newsletter.bat</code></p>
+      <p><strong>Log:</strong> <code>data/logs/newsletter.log</code></p>
+      <p>Runs the full pipeline: subscriber sync → AI research → newsletter writing → email delivery to all active subscribers via Resend.</p>
+    </div>
+  </div>
+</div>
+
+<div class="callout warn">
+  <div class="callout-icon">⚠️</div>
+  <div>The scheduled tasks only run when your PC is <strong>on and logged in</strong>. If the machine is off or sleeping on Tuesday at 9 AM, the newsletter will not send automatically. You can trigger a manual run anytime — see Section 4.</div>
+</div>
+
+
+<!-- 3. HOW SUBSCRIBERS WORK -->
+<h2><span class="num">3</span> How Subscribers Are Managed</h2>
+
+<h3>Subscribe flow</h3>
+<p>When someone fills out the newsletter sign-up form on the SoCal AI Solutions website, Netlify captures the submission. The daily sync task (8 AM) calls the Netlify Forms API and pulls all new submissions into the local cache file at <code>data/subscribers.json</code>.</p>
+
+<h3>Unsubscribe flow</h3>
+<p>If someone submits the unsubscribe form, their email is added to a separate Netlify form. During every sync, the agent fetches unsubscribe submissions and <strong>removes matching emails</strong> from the active list before saving. This happens automatically — no manual action needed.</p>
+
+<h3>Deduplication</h3>
+<p>The merge logic deduplicates by email address (case-insensitive). Submitting the same email twice results in only one subscriber record.</p>
+
+<h3>Local cache</h3>
+<p>The file <code>data/subscribers.json</code> is the source of truth for who receives each newsletter. It is updated by every sync and newsletter run. Example entry:</p>
+
+<pre>{
+  "email": "user@company.com",
+  "name": "Jane Smith",         <span class="comment">// optional — captured from form</span>
+  "subscribed_at": "2026-03-27", <span class="comment">// ISO date of first submission</span>
+  "source": "netlify"           <span class="comment">// "netlify" or "manual"</span>
+}</pre>
+
+
+<!-- 4. COMMANDS -->
+<h2><span class="num">4</span> Commands Reference</h2>
+
+<div class="callout info">
+  <div class="callout-icon">💡</div>
+  <div>All commands below must be run from the agent's root folder:<br/><code>cd C:\Users\luisn\Desktop\newsletter-agent</code></div>
+</div>
+
+<h3>Subscriber management</h3>
+<table>
+  <thead><tr><th>Command</th><th>What it does</th><th>Cost</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>python main.py --sync</td>
+      <td>Pull latest subscribers from Netlify and update local cache. Shows a list of all active subscribers.</td>
+      <td>Free — no API calls</td>
+    </tr>
+    <tr>
+      <td>python main.py --add-sub</td>
+      <td>Manually add a subscriber to the local cache (prompts for email and name). Useful for adding test addresses or VIP contacts without a form submission.</td>
+      <td>Free — no API calls</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Newsletter runs</h3>
+<table>
+  <thead><tr><th>Command</th><th>What it does</th><th>Cost</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>python main.py --dry-run</td>
+      <td>Full pipeline (sync → research → write) but <strong>does not send</strong>. Saves the finished newsletter HTML to <code>data/last_newsletter.html</code> for review. Use this to preview what would be sent.</td>
+      <td>Claude API tokens only</td>
+    </tr>
+    <tr>
+      <td>python main.py --test</td>
+      <td>Full pipeline + sends to <strong>TEST_EMAIL only</strong> (defined in <code>.env</code>). Use this to verify the full flow — research, writing, and delivery — before a real send.</td>
+      <td>Claude API + Resend (1 email)</td>
+    </tr>
+    <tr>
+      <td>python main.py</td>
+      <td>Full pipeline + sends to <strong>all active subscribers</strong>. This is what the Tuesday scheduled task runs automatically.</td>
+      <td>Claude API + Resend (all subscribers)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Scheduled task management</h3>
+<table>
+  <thead><tr><th>Command</th><th>What it does</th><th>Requires Admin</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>python setup_schedule.py</td>
+      <td>Register the weekly Tuesday newsletter task in Windows Task Scheduler.</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>python setup_schedule.py --add-sync</td>
+      <td>Register the daily 8 AM subscriber sync task.</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>python setup_schedule.py --status</td>
+      <td>Show the current status of the newsletter task (last run, next run, result code).</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>python setup_schedule.py --run</td>
+      <td>Trigger the newsletter task immediately via Task Scheduler (same environment as an automated run).</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>python setup_schedule.py --remove</td>
+      <td>Remove the weekly newsletter task from Task Scheduler.</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>python setup_schedule.py --remove-sync</td>
+      <td>Remove the daily sync task from Task Scheduler.</td>
+      <td>Yes</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout tip">
+  <div class="callout-icon">✅</div>
+  <div><strong>Recommended test sequence for a new setup:</strong><br/>
+  1. <code>python main.py --sync</code> — verify subscribers are being pulled<br/>
+  2. <code>python main.py --dry-run</code> — check the newsletter quality, open <code>data/last_newsletter.html</code> in a browser<br/>
+  3. <code>python main.py --test</code> — send to yourself and confirm email delivery<br/>
+  4. Let the Tuesday schedule take over</div>
+</div>
+
+
+<!-- 5. FILE STRUCTURE -->
+<h2><span class="num">5</span> File Structure</h2>
+
+<div class="file-tree">
+  <span class="dir">newsletter-agent/</span><br/>
+  &nbsp;&nbsp;├── <span class="file">main.py</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← entry point for all commands</span><br/>
+  &nbsp;&nbsp;├── <span class="file">config.py</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← loads .env, validates API keys</span><br/>
+  &nbsp;&nbsp;├── <span class="file">setup_schedule.py</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← manages Windows Task Scheduler tasks</span><br/>
+  &nbsp;&nbsp;├── <span class="file">run_newsletter.bat</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← called by weekly Task Scheduler task</span><br/>
+  &nbsp;&nbsp;├── <span class="file">run_sync.bat</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← called by daily Task Scheduler task</span><br/>
+  &nbsp;&nbsp;├── <span class="file">.env</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← API keys and settings (never share)</span><br/>
+  &nbsp;&nbsp;├── <span class="dir">agents/</span><br/>
+  &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="file">research_agent.py</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← Claude + web search for AI topics</span><br/>
+  &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="file">writer_agent.py</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← Claude writes HTML newsletter</span><br/>
+  &nbsp;&nbsp;├── <span class="dir">services/</span><br/>
+  &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="file">subscriber_manager.py</span> <span class="note">← Netlify Forms sync + local cache</span><br/>
+  &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="file">email_sender.py</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← sends emails via Resend API</span><br/>
+  &nbsp;&nbsp;└── <span class="dir">data/</span><br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">subscribers.json</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← active subscriber list (auto-updated)</span><br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">last_newsletter.html</span> &nbsp;&nbsp;<span class="note">← preview of most recent newsletter</span><br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="dir">logs/</span><br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;├── <span class="file">newsletter.log</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← weekly send logs</span><br/>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── <span class="file">sync.log</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="note">← daily sync logs</span>
+</div>
+
+
+<!-- 6. ENVIRONMENT VARIABLES -->
+<h2><span class="num">6</span> Configuration (.env)</h2>
+
+<p>All secrets and settings live in the <code>.env</code> file in the agent root. Never commit or share this file.</p>
+
+<table class="env-table">
+  <thead><tr><th>Variable</th><th>Example Value</th><th>Required</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>ANTHROPIC_API_KEY</td>
+      <td>sk-ant-api03-...</td>
+      <td><span class="badge req">Required</span></td>
+      <td>Powers both the research and writing agents</td>
+    </tr>
+    <tr>
+      <td>RESEND_API_KEY</td>
+      <td>re_abc123...</td>
+      <td><span class="badge req">Required</span></td>
+      <td>Used to send emails via Resend</td>
+    </tr>
+    <tr>
+      <td>NEWSLETTER_FROM_EMAIL</td>
+      <td>newsletter@socalaisolutions.org</td>
+      <td><span class="badge req">Required</span></td>
+      <td>Must be a verified sender domain in Resend</td>
+    </tr>
+    <tr>
+      <td>NETLIFY_API_TOKEN</td>
+      <td>nfp_...</td>
+      <td><span class="badge req">Required</span></td>
+      <td>Personal access token from Netlify dashboard</td>
+    </tr>
+    <tr>
+      <td>NETLIFY_FORM_ID</td>
+      <td>69c604f6d58b...</td>
+      <td><span class="badge req">Required</span></td>
+      <td>ID of the subscribe form — found in Netlify Forms URL</td>
+    </tr>
+    <tr>
+      <td>NETLIFY_UNSUBSCRIBE_FORM_ID</td>
+      <td>69c697e3dba8...</td>
+      <td><span class="badge opt">Optional</span></td>
+      <td>ID of the unsubscribe form. If omitted, no one is removed.</td>
+    </tr>
+    <tr>
+      <td>NEWSLETTER_FROM_NAME</td>
+      <td>SoCal AI Solutions</td>
+      <td><span class="badge opt">Optional</span></td>
+      <td>Display name in the From field of emails</td>
+    </tr>
+    <tr>
+      <td>NEWSLETTER_BCC_EMAIL</td>
+      <td>luis@socalaisolutions.com</td>
+      <td><span class="badge opt">Optional</span></td>
+      <td>BCC address to receive a copy of every send</td>
+    </tr>
+    <tr>
+      <td>TEST_EMAIL</td>
+      <td>luis@socalaisolutions.com</td>
+      <td><span class="badge opt">Optional</span></td>
+      <td>Destination for <code>--test</code> runs</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<!-- 7. LOGS -->
+<h2><span class="num">7</span> Reading the Logs</h2>
+
+<p>Each automated run appends output to a log file. Open them in any text editor, or tail them live in PowerShell.</p>
+
+<h3>View the latest newsletter log</h3>
+<pre><span class="comment"># Show last 100 lines</span>
+<span class="cmd">Get-Content</span> data\logs\newsletter.log <span class="flag">-Tail</span> 100
+
+<span class="comment"># Live tail (updates as new lines arrive)</span>
+<span class="cmd">Get-Content</span> data\logs\newsletter.log <span class="flag">-Wait</span></pre>
+
+<h3>View the latest sync log</h3>
+<pre><span class="cmd">Get-Content</span> data\logs\sync.log <span class="flag">-Tail</span> 50</pre>
+
+<h3>What a successful run looks like</h3>
+<pre><span class="out">############################################################</span>
+<span class="out"># RUN START — 2026-03-25 09:00:01</span>
+<span class="out">############################################################</span>
+
+>> Step 1: Syncing subscriber list...
+   ↳ Fetched 4 subscribers from Netlify Forms
+   ✓ 3 active subscribers
+
+>> Step 2: Researching hot AI topics this week...
+   ✓ 3 topics identified
+
+>> Step 3: Writing newsletter...
+   ✓ Subject: "5 AI Breakthroughs Reshaping Business This Week"
+   ✓ HTML size: 14,823 bytes
+
+>> Step 4: Sending to 3 subscriber(s)...
+   Sent: 3  |  Failed: 0</pre>
+
+<div class="callout warn">
+  <div class="callout-icon">⚠️</div>
+  <div>If <strong>Failed: &gt; 0</strong> appears, check that the recipient email address is valid and that your Resend account is in good standing. The log will show which address failed.</div>
+</div>
+
+
+<!-- 8. TROUBLESHOOTING -->
+<h2><span class="num">8</span> Troubleshooting</h2>
+
+<table>
+  <thead><tr><th>Symptom</th><th>Likely Cause</th><th>Fix</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>subscribers.json not updating</td>
+      <td>Daily sync task not registered, or PC was off at 8 AM</td>
+      <td>Run <code>python main.py --sync</code> manually. Re-register with <code>setup_schedule.py --add-sync</code> (Admin).</td>
+    </tr>
+    <tr>
+      <td>Fetched 0 from Netlify Forms</td>
+      <td>NETLIFY_FORM_ID is wrong or token expired</td>
+      <td>Check Netlify dashboard → Forms → click your form → copy ID from URL. Update <code>.env</code>.</td>
+    </tr>
+    <tr>
+      <td>Newsletter not sending on Tuesday</td>
+      <td>PC was off / sleeping, or task not registered</td>
+      <td>Run <code>python setup_schedule.py --status</code> to confirm task exists. Run <code>python main.py</code> to send manually.</td>
+    </tr>
+    <tr>
+      <td>ERROR: Access is denied (schtasks)</td>
+      <td>setup_schedule.py needs Administrator privileges</td>
+      <td>Open Terminal as Administrator: Win+X → Terminal (Admin)</td>
+    </tr>
+    <tr>
+      <td>Missing required environment variables</td>
+      <td>.env file missing or incomplete</td>
+      <td>Copy <code>.env.example</code> to <code>.env</code> and fill in all required values. See Section 6.</td>
+    </tr>
+    <tr>
+      <td>Emails going to spam</td>
+      <td>Domain not verified in Resend</td>
+      <td>Add and verify the SPF/DKIM DNS records in your domain provider per Resend's setup guide.</td>
+    </tr>
+    <tr>
+      <td>Rate limit error from Claude API</td>
+      <td>Research and writing steps hit per-minute token limit</td>
+      <td>The agent auto-pauses 65 seconds between research and writing. If errors persist, try running during off-peak hours.</td>
+    </tr>
+  </tbody>
+</table>
+
+
+<!-- FOOTER -->
+<div class="doc-footer">
+  <span>SoCal AI Solutions &nbsp;·&nbsp; Newsletter Agent v1.0 &nbsp;·&nbsp; March 2026</span>
+  <span>Internal reference — do not distribute</span>
+</div>
+
+</body>
+</html>
