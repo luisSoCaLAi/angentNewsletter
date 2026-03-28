@@ -1,12 +1,12 @@
-name: Weekly Newsletter
+name: Welcome New Subscribers
 
 on:
   schedule:
-    - cron: '0 17 * * 2'  # Every Tuesday at 9 AM PST (17:00 UTC)
-  workflow_dispatch:        # Allow manual trigger from GitHub Actions tab
+    - cron: '0 */3 * * *'  # Every 3 hours
+  workflow_dispatch:         # Allow manual trigger
 
 jobs:
-  send-newsletter:
+  welcome:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run newsletter agent
+      - name: Send welcome newsletter to new subscribers
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
@@ -33,12 +33,12 @@ jobs:
           NEWSLETTER_FROM_NAME: ${{ secrets.NEWSLETTER_FROM_NAME }}
           NEWSLETTER_BCC_EMAIL: ${{ secrets.NEWSLETTER_BCC_EMAIL }}
           UNSUBSCRIBE_BASE_URL: ${{ secrets.UNSUBSCRIBE_BASE_URL }}
-        run: python main.py
+        run: python main.py --welcome
 
-      - name: Commit newsletter archive
+      - name: Commit updated welcomed list
         run: |
           git config user.name "Newsletter Agent"
           git config user.email "actions@github.com"
-          git add data/last_newsletter.html data/newsletters/ || true
-          git diff --staged --quiet || git commit -m "chore: archive newsletter $(date +%Y-%m-%d)"
+          git add data/welcomed.json || true
+          git diff --staged --quiet || git commit -m "chore: update welcomed subscribers $(date +%Y-%m-%d)"
           git push

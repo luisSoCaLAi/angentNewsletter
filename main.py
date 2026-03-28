@@ -13,6 +13,7 @@ Usage:
   python main.py --test       # Send test email to TEST_EMAIL env var
   python main.py --dry-run    # Research + write, save HTML, don't send
   python main.py --add-sub    # Add a subscriber manually to local cache
+  python main.py --welcome    # Send most recent newsletter to new subscribers
 """
 
 import argparse
@@ -190,6 +191,68 @@ def _archive_newsletter(html: str, subject: str, sent_count: int, is_test: bool)
         json.dump(index, f, indent=2, ensure_ascii=False)
 
 
+def run_welcome():
+    """Send the most recent newsletter to any subscribers who haven't received it yet."""
+    import json
+
+    banner("Welcome Newsletter — New Subscriber Check")
+    validate_config()
+
+    # Load last newsletter
+    preview_path = os.path.join("data", "last_newsletter.html")
+    if not os.path.exists(preview_path):
+        print("   No newsletter found at data/last_newsletter.html — skipping.")
+        return
+
+    # Load newsletter subject from index
+    index_path = os.path.join("data", "newsletters", "index.json")
+    subject = "Welcome — Your first AI Insider newsletter"
+    if os.path.exists(index_path):
+        with open(index_path, "r", encoding="utf-8") as f:
+            index = json.load(f)
+        if index:
+            subject = f"Welcome! {index[0]['subject']}"
+
+    with open(preview_path, "r", encoding="utf-8") as f:
+        full_html = f.read()
+
+    # Load welcomed list
+    welcomed_path = os.path.join("data", "welcomed.json")
+    if os.path.exists(welcomed_path):
+        with open(welcomed_path, "r", encoding="utf-8") as f:
+            welcomed = set(json.load(f))
+    else:
+        welcomed = set()
+
+    # Get current subscribers
+    mgr = SubscriberManager()
+    subscribers = mgr.sync()
+    new_subscribers = [s for s in subscribers if s["email"].lower() not in welcomed]
+
+    if not new_subscribers:
+        print("   No new subscribers to welcome.")
+        return
+
+    print(f"   Found {len(new_subscribers)} new subscriber(s) to welcome:")
+    for s in new_subscribers:
+        print(f"      - {s['email']}")
+    print()
+
+    sender = EmailSender()
+    for subscriber in new_subscribers:
+        try:
+            sender.send_test(full_html, subject, subscriber["email"])
+            welcomed.add(subscriber["email"].lower())
+        except Exception as e:
+            print(f"   Failed to welcome {subscriber['email']}: {e}")
+
+    # Save updated welcomed list
+    os.makedirs("data", exist_ok=True)
+    with open(welcomed_path, "w", encoding="utf-8") as f:
+        json.dump(sorted(welcomed), f, indent=2)
+    print(f"\n   welcomed.json updated — {len(welcomed)} total welcomed.")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="SoCal AI Solutions — Weekly Newsletter Agent"
@@ -214,12 +277,19 @@ def main():
         action="store_true",
         help="Pull latest subscribers from Netlify and update local cache (no email sent).",
     )
+    parser.add_argument(
+        "--welcome",
+        action="store_true",
+        help="Send the most recent newsletter to any subscribers not yet welcomed.",
+    )
     args = parser.parse_args()
 
     if args.add_sub:
         run_add_subscriber()
     elif args.sync:
         run_sync_only()
+    elif args.welcome:
+        run_welcome()
     else:
         run_full(args)
 
