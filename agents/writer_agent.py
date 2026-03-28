@@ -32,8 +32,8 @@ REQUIRED SECTIONS (in order):
 2. Brief intro paragraph (2-3 sentences, warm and welcoming)
 3. Three article sections — one per topic below
 4. "Until Next Week" sign-off section with CTA to visit the website
-5. Footer with unsubscribe link — MUST use this exact HTML, no changes:
-   <p style="margin:0;font-size:12px;color:#999;">Don't want these emails? <a href="{{{{unsubscribe_url}}}}" style="color:#999;">Unsubscribe</a></p>
+5. Footer with unsubscribe link — MUST include this exact HTML verbatim, do not change the placeholder text:
+   <p style="margin:0;font-size:12px;color:#999;">Don't want these emails? <a href="%%UNSUBSCRIBE_URL%%" style="color:#999;">Unsubscribe</a></p>
 
 ---
 STYLING REQUIREMENTS:

@@ -8,5 +8,6 @@ venv/
 .DS_Store
 data/subscribers.json
 data/last_newsletter.html
+data/dashboard.html
 data/logs/
 data/newsletters/

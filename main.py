@@ -98,9 +98,11 @@ def run_full(args):
     if args.test:
         test_email = os.getenv("TEST_EMAIL") or input("Enter test email address: ").strip()
         sender.send_test(full_html, subject, test_email)
+        _archive_newsletter(full_html, subject, sent_count=1, is_test=True)
     else:
         results = sender.send_newsletter(full_html, subject, subscribers)
         print(f"\n   Sent: {results['sent']}  |  Failed: {len(results['failed'])}")
+        _archive_newsletter(full_html, subject, sent_count=results["sent"], is_test=False)
 
     # ── Summary ──────────────────────────────────────────────────────
     banner(f"Done -- {datetime.now().strftime('%Y-%m-%d %H:%M')}")
@@ -152,6 +154,40 @@ def _save_preview(html: str, subject: str) -> None:
     with open(preview_path, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"   Preview saved -> {preview_path}")
+
+
+def _archive_newsletter(html: str, subject: str, sent_count: int, is_test: bool) -> None:
+    """Save newsletter to dated archive and update index.json for the dashboard."""
+    import json
+    archive_dir = os.path.join("data", "newsletters")
+    os.makedirs(archive_dir, exist_ok=True)
+
+    date_str = datetime.now().strftime("%Y-%m-%d")
+    filename = f"{date_str}.html"
+    filepath = os.path.join(archive_dir, filename)
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(html)
+
+    index_path = os.path.join(archive_dir, "index.json")
+    if os.path.exists(index_path):
+        with open(index_path, "r", encoding="utf-8") as f:
+            index = json.load(f)
+    else:
+        index = []
+
+    # Replace existing entry for today if re-run, otherwise append
+    index = [e for e in index if e.get("date") != date_str]
+    index.append({
+        "date": date_str,
+        "subject": subject,
+        "sent_count": sent_count,
+        "is_test": is_test,
+        "filename": filename,
+    })
+    index.sort(key=lambda e: e["date"], reverse=True)
+
+    with open(index_path, "w", encoding="utf-8") as f:
+        json.dump(index, f, indent=2, ensure_ascii=False)
 
 
 def main():

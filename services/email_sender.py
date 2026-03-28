@@ -88,7 +88,7 @@ class EmailSender:
         encoded_email = urllib.parse.quote(email)
         unsubscribe_url = f"{UNSUBSCRIBE_BASE_URL}?email={encoded_email}"
 
-        html = html.replace("{{unsubscribe_url}}", unsubscribe_url)
+        html = html.replace("%%UNSUBSCRIBE_URL%%", unsubscribe_url)
         html = html.replace("{{subscriber_name}}", html_lib.escape(name) if name else "there")
         html = html.replace("{{subscriber_email}}", html_lib.escape(email))
         return html
