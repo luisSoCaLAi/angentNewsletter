@@ -171,7 +171,7 @@ def _archive_newsletter(html: str, subject: str, sent_count: int, is_test: bool)
 
     index_path = os.path.join(archive_dir, "index.json")
     if os.path.exists(index_path):
-        with open(index_path, "r", encoding="utf-8") as f:
+        with open(index_path, "r", encoding="utf-8-sig") as f:
             index = json.load(f)
     else:
         index = []
