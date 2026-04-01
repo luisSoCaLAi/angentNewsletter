@@ -54,7 +54,7 @@ TOPICS TO COVER:
 {topics_json}
 
 ---
-WEBSITE URL: https://www.socalaisolutions.com
+WEBSITE URL: https://socalaisolutions.com
 
 Output ONLY the HTML. No preamble, no markdown code fences."""
 
@@ -85,10 +85,12 @@ class WriterAgent:
         for attempt in range(retries):
             try:
                 return fn()
-            except anthropic.RateLimitError:
+            except (anthropic.RateLimitError, anthropic.APIStatusError) as e:
                 if attempt == retries - 1:
                     raise
-                print(f"   Rate limit hit — waiting {wait}s before retry ({attempt + 1}/{retries - 1})...")
+                if isinstance(e, anthropic.APIStatusError) and e.status_code != 529:
+                    raise
+                print(f"   API overloaded/rate-limited — waiting {wait}s before retry ({attempt + 1}/{retries - 1})...")
                 time.sleep(wait)
             except (httpx.ReadError, httpx.RemoteProtocolError, anthropic.APIConnectionError):
                 if attempt == retries - 1:
