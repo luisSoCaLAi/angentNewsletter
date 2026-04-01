@@ -24,6 +24,9 @@ You output ONLY valid HTML — no markdown, no explanations, just the HTML body 
 
 HTML_TEMPLATE_PROMPT = """Write the HTML body for this week's "AI Insider" newsletter.
 
+Today's date: {today_date} ({today_weekday})
+Use this exact date in the header and opening sentence — do not invent or approximate the date or day.
+
 Use this responsive email-safe HTML structure:
 
 ---
@@ -103,7 +106,12 @@ class WriterAgent:
         import json
 
         topics_json = json.dumps(topics, indent=2)
-        user_prompt = HTML_TEMPLATE_PROMPT.format(topics_json=topics_json)
+        now = datetime.now()
+        user_prompt = HTML_TEMPLATE_PROMPT.format(
+            topics_json=topics_json,
+            today_date=now.strftime("%B %d, %Y"),
+            today_weekday=now.strftime("%A"),
+        )
 
         def _call():
             response = self.client.messages.create(
