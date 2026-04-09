@@ -76,10 +76,11 @@ class ResearchAgent:
             except (anthropic.RateLimitError, anthropic.APIStatusError) as e:
                 if attempt == 3:
                     raise
-                if isinstance(e, anthropic.APIStatusError) and e.status_code != 529:
+                status = getattr(e, "status_code", None)
+                if status not in (429, 529):
                     raise
                 wait = 65
-                print(f"   API overloaded/rate-limited — waiting {wait}s before retry ({attempt + 1}/3)...")
+                print(f"   API rate-limited/overloaded (HTTP {status}) — waiting {wait}s before retry ({attempt + 1}/3)...")
                 time.sleep(wait)
 
         return self._parse_topics(response)

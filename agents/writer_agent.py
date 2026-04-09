@@ -91,9 +91,10 @@ class WriterAgent:
             except (anthropic.RateLimitError, anthropic.APIStatusError) as e:
                 if attempt == retries - 1:
                     raise
-                if isinstance(e, anthropic.APIStatusError) and e.status_code != 529:
+                status = getattr(e, "status_code", None)
+                if status not in (429, 529):
                     raise
-                print(f"   API overloaded/rate-limited — waiting {wait}s before retry ({attempt + 1}/{retries - 1})...")
+                print(f"   API rate-limited/overloaded (HTTP {status}) — waiting {wait}s before retry ({attempt + 1}/{retries - 1})...")
                 time.sleep(wait)
             except (httpx.ReadError, httpx.RemoteProtocolError, anthropic.APIConnectionError):
                 if attempt == retries - 1:
