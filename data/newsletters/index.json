@@ -1,5 +1,12 @@
 [
   {
+    "date": "2026-04-14",
+    "subject": "This week in AI: What's changing for your business",
+    "sent_count": 10,
+    "is_test": false,
+    "filename": "2026-04-14.html"
+  },
+  {
     "date": "2026-04-09",
     "subject": "This week in AI: Enterprise tools get simpler for SMBs",
     "sent_count": 10,
