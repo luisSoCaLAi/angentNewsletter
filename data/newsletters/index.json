@@ -1,5 +1,12 @@
 [
   {
+    "date": "2026-05-19",
+    "subject": "This week in AI: Claude meets SMB budgets",
+    "sent_count": 8,
+    "is_test": false,
+    "filename": "2026-05-19.html"
+  },
+  {
     "date": "2026-05-12",
     "subject": "This week in AI: Agents are driving real ROI for SMBs",
     "sent_count": 8,
