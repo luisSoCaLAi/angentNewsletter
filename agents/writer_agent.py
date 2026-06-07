@@ -3,11 +3,53 @@ Writer Agent — uses Claude Opus 4.6 to write a polished HTML newsletter
 from the research topics, branded for SoCal AI Solutions.
 """
 
+import base64
+import re
 import time
 from datetime import datetime
+from pathlib import Path
 import anthropic
 import httpx
 from config import ANTHROPIC_API_KEY, NEWSLETTER_FROM_NAME
+
+_LOGO_PATH = Path(__file__).parent.parent / "assets" / "logo-dark.png"
+_IMG_TAG = '<img src="https://socalaisolutions.com/assets/logo-dark.png" alt="SoCal A.I. Solutions" style="height:48px;width:auto;display:block;margin:0 auto 12px;">'
+
+
+def _get_logo_data_uri() -> str | None:
+    if not _LOGO_PATH.exists():
+        return None
+    data = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii")
+    return f"data:image/png;base64,{data}"
+
+
+def _ensure_logo(html: str) -> str:
+    """Guarantee the logo img tag has the correct src (data URI if available, else .com URL)."""
+    data_uri = _get_logo_data_uri()
+    correct_src = data_uri if data_uri else "https://socalaisolutions.com/assets/logo-dark.png"
+
+    correct_img = (
+        f'<img src="{correct_src}" alt="SoCal A.I. Solutions"'
+        ' style="height:48px;width:auto;display:block;margin:0 auto 12px;">'
+    )
+
+    if re.search(r'<img[^>]+alt="SoCal A\.I\. Solutions"', html):
+        html = re.sub(
+            r'<img([^>]+)alt="SoCal A\.I\. Solutions"([^>]*)>',
+            correct_img,
+            html,
+            count=1,
+        )
+    else:
+        # Inject as first child of the dark header div
+        html = re.sub(
+            r'(<div[^>]*background:\s*#1a1a2e[^>]*>)',
+            r'\1\n    ' + correct_img,
+            html,
+            count=1,
+        )
+
+    return html
 
 SYSTEM_PROMPT = f"""You are a senior content writer for {NEWSLETTER_FROM_NAME}, \
 an AI consulting firm helping small and medium businesses across the US adopt AI.
@@ -43,7 +85,7 @@ STYLING REQUIREMENTS:
 - Inline CSS only (email clients strip stylesheets)
 - Max width: 600px, centered, white background
 - Header: dark background (#1a1a2e), use this exact logo img tag followed by the newsletter name and date:
-  <img src="https://socalaisolutions.org/assets/logo-dark.png" alt="SoCal A.I. Solutions" style="height:48px;width:auto;display:block;margin:0 auto 12px;">
+  <img src="https://socalaisolutions.com/assets/logo-dark.png" alt="SoCal A.I. Solutions" style="height:48px;width:auto;display:block;margin:0 auto 12px;">
   Do NOT use any emoji or placeholder — use the img tag above.
 - Topic sections: alternating slightly warm background (#f9f9f9 / white), left border accent (#4f46e5)
 - "Business Impact" callout box: light purple background (#ede9fe), border-radius
@@ -132,7 +174,8 @@ class WriterAgent:
             if html.endswith("```"):
                 html = html.rsplit("```", 1)[0]
 
-        return html.strip()
+        html = _ensure_logo(html.strip())
+        return html
 
     def generate_subject(self, topics: list[dict]) -> str:
         """Generate the email subject line from the topic titles."""

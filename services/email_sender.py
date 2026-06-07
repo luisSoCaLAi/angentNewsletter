@@ -75,7 +75,7 @@ class EmailSender:
         params = {
             "from": self.from_address,
             "to": [test_email],
-            "subject": f"[TEST] {subject}",
+            "subject": subject,
             "html": personalized_html,
         }
         resend.Emails.send(params)
