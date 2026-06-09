@@ -7,29 +7,56 @@ import base64
 import re
 import time
 from datetime import datetime
+from io import BytesIO
 from pathlib import Path
 import anthropic
 import httpx
 from config import ANTHROPIC_API_KEY, NEWSLETTER_FROM_NAME
 
 _LOGO_PATH = Path(__file__).parent.parent / "assets" / "logo-dark.png"
-_IMG_TAG = '<img src="https://socalaisolutions.com/assets/logo-dark.png" alt="SoCal A.I. Solutions" style="height:48px;width:auto;display:block;margin:0 auto 12px;">'
+_LOGO_DATA_URI: str | None = None
+
+_UNSUBSCRIBE_HTML = (
+    '<p style="margin:0;font-size:12px;color:#999;">'
+    "Don't want these emails? "
+    '<a href="%%UNSUBSCRIBE_URL%%" style="color:#999;">Unsubscribe</a>'
+    '</p>'
+)
 
 
-def _get_logo_data_uri() -> str | None:
+def _get_logo_data_uri() -> str:
+    """Return a base64 data URI for the logo, resized for email (96px height, 2x retina).
+
+    Cached after first call. Falls back to the external URL if the file is missing.
+    """
+    global _LOGO_DATA_URI
+    if _LOGO_DATA_URI is not None:
+        return _LOGO_DATA_URI
+
     if not _LOGO_PATH.exists():
-        return None
-    data = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii")
-    return f"data:image/png;base64,{data}"
+        _LOGO_DATA_URI = "https://socalaisolutions.com/assets/logo-dark.png"
+        return _LOGO_DATA_URI
+
+    from PIL import Image
+
+    img = Image.open(_LOGO_PATH).convert("RGBA")
+    target_h = 96  # 2× retina for 48px display height
+    ratio = target_h / img.height
+    new_w = max(1, int(img.width * ratio))
+    img = img.resize((new_w, target_h), Image.LANCZOS)
+
+    buf = BytesIO()
+    img.save(buf, format="PNG", optimize=True)
+    encoded = base64.b64encode(buf.getvalue()).decode()
+    _LOGO_DATA_URI = f"data:image/png;base64,{encoded}"
+    return _LOGO_DATA_URI
 
 
 def _ensure_logo(html: str) -> str:
-    """Guarantee the logo img tag has the correct src (data URI if available, else .com URL)."""
-    data_uri = _get_logo_data_uri()
-    correct_src = data_uri if data_uri else "https://socalaisolutions.com/assets/logo-dark.png"
-
+    """Guarantee the logo img tag uses a base64 data URI (never blocked by email clients)."""
+    src = _get_logo_data_uri()
     correct_img = (
-        f'<img src="{correct_src}" alt="SoCal A.I. Solutions"'
+        f'<img src="{src}" alt="SoCal A.I. Solutions"'
         ' style="height:48px;width:auto;display:block;margin:0 auto 12px;">'
     )
 
@@ -49,6 +76,24 @@ def _ensure_logo(html: str) -> str:
             count=1,
         )
 
+    return html
+
+
+def _ensure_unsubscribe(html: str) -> str:
+    """Guarantee the unsubscribe placeholder is present — Claude doesn't always include it."""
+    if "%%UNSUBSCRIBE_URL%%" in html:
+        return html
+    # Inject before </body>; if no body tag, append at end
+    if re.search(r'</body>', html, flags=re.IGNORECASE):
+        html = re.sub(
+            r'</body>',
+            _UNSUBSCRIBE_HTML + '\n</body>',
+            html,
+            count=1,
+            flags=re.IGNORECASE,
+        )
+    else:
+        html = html + "\n" + _UNSUBSCRIBE_HTML
     return html
 
 SYSTEM_PROMPT = f"""You are a senior content writer for {NEWSLETTER_FROM_NAME}, \
@@ -174,7 +219,12 @@ class WriterAgent:
             if html.endswith("```"):
                 html = html.rsplit("```", 1)[0]
 
-        html = _ensure_logo(html.strip())
+        html = html.strip()
+        html = re.sub(r'\s*</body>\s*</html>\s*$', '', html, flags=re.IGNORECASE).strip()
+        html = re.sub(r'\s*</body>\s*$', '', html, flags=re.IGNORECASE).strip()
+
+        html = _ensure_logo(html)
+        html = _ensure_unsubscribe(html)
         return html
 
     def generate_subject(self, topics: list[dict]) -> str:
