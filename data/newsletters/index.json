@@ -1,5 +1,75 @@
 [
   {
+    "date": "2026-06-09",
+    "subject": "This week: AI agents deliver real ROI for small businesses",
+    "sent_count": 9,
+    "is_test": false,
+    "filename": "2026-06-09.html"
+  },
+  {
+    "date": "2026-06-07",
+    "subject": "This week in AI: Automation ROI, new Microsoft bundles",
+    "sent_count": 8,
+    "is_test": false,
+    "filename": "2026-06-07.html"
+  },
+  {
+    "date": "2026-06-04",
+    "subject": "This week in AI: Affordable agents are finally here",
+    "sent_count": 8,
+    "is_test": false,
+    "filename": "2026-06-04.html"
+  },
+  {
+    "date": "2026-06-03",
+    "subject": "This week in AI: Agents, spreadsheets, and IPOs",
+    "sent_count": 0,
+    "is_test": false,
+    "filename": "2026-06-03.html"
+  },
+  {
+    "date": "2026-05-26",
+    "subject": "This week in AI: What SMBs need to know",
+    "sent_count": 8,
+    "is_test": false,
+    "filename": "2026-05-26.html"
+  },
+  {
+    "date": "2026-05-19",
+    "subject": "This week in AI: Claude meets SMB budgets",
+    "sent_count": 8,
+    "is_test": false,
+    "filename": "2026-05-19.html"
+  },
+  {
+    "date": "2026-05-12",
+    "subject": "This week in AI: Agents are driving real ROI for SMBs",
+    "sent_count": 8,
+    "is_test": false,
+    "filename": "2026-05-12.html"
+  },
+  {
+    "date": "2026-05-05",
+    "subject": "This week in AI: What's changing for your business",
+    "sent_count": 7,
+    "is_test": false,
+    "filename": "2026-05-05.html"
+  },
+  {
+    "date": "2026-04-14",
+    "subject": "This week in AI: What's changing for your business",
+    "sent_count": 10,
+    "is_test": false,
+    "filename": "2026-04-14.html"
+  },
+  {
+    "date": "2026-04-09",
+    "subject": "This week in AI: Enterprise tools get simpler for SMBs",
+    "sent_count": 10,
+    "is_test": false,
+    "filename": "2026-04-09.html"
+  },
+  {
     "date": "2026-04-01",
     "subject": "This week in AI: What SMBs need to know about agents",
     "sent_count": 10,
