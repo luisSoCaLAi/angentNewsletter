@@ -3,18 +3,13 @@ Writer Agent — uses Claude Opus 4.6 to write a polished HTML newsletter
 from the research topics, branded for SoCal AI Solutions.
 """
 
-import base64
 import re
 import time
 from datetime import datetime
-from io import BytesIO
-from pathlib import Path
 import anthropic
-import httpx
 from config import ANTHROPIC_API_KEY, NEWSLETTER_FROM_NAME
 
-_LOGO_PATH = Path(__file__).parent.parent / "assets" / "logo-dark.png"
-_LOGO_DATA_URI: str | None = None
+LOGO_URL = "https://socalaisolutions.com/assets/logo-dark.png"
 
 _UNSUBSCRIBE_HTML = (
     '<p style="margin:0;font-size:12px;color:#999;">'
@@ -24,39 +19,11 @@ _UNSUBSCRIBE_HTML = (
 )
 
 
-def _get_logo_data_uri() -> str:
-    """Return a base64 data URI for the logo, resized for email (96px height, 2x retina).
-
-    Cached after first call. Falls back to the external URL if the file is missing.
-    """
-    global _LOGO_DATA_URI
-    if _LOGO_DATA_URI is not None:
-        return _LOGO_DATA_URI
-
-    if not _LOGO_PATH.exists():
-        _LOGO_DATA_URI = "https://socalaisolutions.com/assets/logo-dark.png"
-        return _LOGO_DATA_URI
-
-    from PIL import Image
-
-    img = Image.open(_LOGO_PATH).convert("RGBA")
-    target_h = 96  # 2× retina for 48px display height
-    ratio = target_h / img.height
-    new_w = max(1, int(img.width * ratio))
-    img = img.resize((new_w, target_h), Image.LANCZOS)
-
-    buf = BytesIO()
-    img.save(buf, format="PNG", optimize=True)
-    encoded = base64.b64encode(buf.getvalue()).decode()
-    _LOGO_DATA_URI = f"data:image/png;base64,{encoded}"
-    return _LOGO_DATA_URI
-
-
 def _ensure_logo(html: str) -> str:
-    """Guarantee the logo img tag uses a base64 data URI (never blocked by email clients)."""
-    src = _get_logo_data_uri()
+    """Guarantee the correct logo img tag is present. Uses an external URL — data URIs are
+    stripped by Gmail and most major email clients, making base64 embedding counterproductive."""
     correct_img = (
-        f'<img src="{src}" alt="SoCal A.I. Solutions"'
+        f'<img src="{LOGO_URL}" alt="SoCal A.I. Solutions"'
         ' style="height:48px;width:auto;display:block;margin:0 auto 12px;">'
     )
 

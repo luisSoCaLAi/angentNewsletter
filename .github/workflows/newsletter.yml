@@ -25,6 +25,25 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Check LinkedIn token expiry
+        env:
+          LINKEDIN_TOKEN_EXPIRY: ${{ secrets.LINKEDIN_TOKEN_EXPIRY }}
+        run: |
+          python - <<'EOF'
+          import os, time
+          expiry = float(os.getenv("LINKEDIN_TOKEN_EXPIRY", "0"))
+          if expiry == 0:
+              print("::warning::LINKEDIN_TOKEN_EXPIRY secret not set — LinkedIn posting will be skipped.")
+          else:
+              days_left = (expiry - time.time()) / 86400
+              if days_left < 0:
+                  print("::error::LinkedIn access token has EXPIRED. Run setup_linkedin.py --auth locally and update the LINKEDIN_ACCESS_TOKEN secret.")
+              elif days_left < 14:
+                  print(f"::warning::LinkedIn access token expires in {days_left:.0f} days. Run setup_linkedin.py --auth locally and update the LINKEDIN_ACCESS_TOKEN + LINKEDIN_TOKEN_EXPIRY secrets before it expires.")
+              else:
+                  print(f"LinkedIn token OK — {days_left:.0f} days remaining.")
+          EOF
+
       - name: Run newsletter agent
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -36,6 +55,13 @@ jobs:
           NEWSLETTER_FROM_NAME: ${{ secrets.NEWSLETTER_FROM_NAME }}
           NEWSLETTER_BCC_EMAIL: ${{ secrets.NEWSLETTER_BCC_EMAIL }}
           UNSUBSCRIBE_BASE_URL: ${{ secrets.UNSUBSCRIBE_BASE_URL }}
+          LINKEDIN_CLIENT_ID: ${{ secrets.LINKEDIN_CLIENT_ID }}
+          LINKEDIN_CLIENT_SECRET: ${{ secrets.LINKEDIN_CLIENT_SECRET }}
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_TOKEN_EXPIRY: ${{ secrets.LINKEDIN_TOKEN_EXPIRY }}
+          LINKEDIN_MEMBER_URN: ${{ secrets.LINKEDIN_MEMBER_URN }}
+          LINKEDIN_ORGANIZATION_ID: ${{ secrets.LINKEDIN_ORGANIZATION_ID }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         run: python main.py
 
       - name: Commit newsletter archive

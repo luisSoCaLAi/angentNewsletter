@@ -169,7 +169,7 @@ def build_dashboard(subscribers, index, unsub_count, total_signups) -> str:
 <body>
 
 <header>
-  <img src="https://socalaisolutions.org/assets/logo-dark.png" alt="SoCal AI Solutions" />
+  <img src="https://socalaisolutions.com/assets/logo-dark.png" alt="SoCal AI Solutions" />
   <div>
     <h1>Newsletter Dashboard</h1>
     <p>Generated {generated}</p>
@@ -183,7 +183,7 @@ def build_dashboard(subscribers, index, unsub_count, total_signups) -> str:
     <div class="stat-card">
       <div class="label">Active Subscribers</div>
       <div class="value">{active}</div>
-      <div class="sub">{total_signups} total sign-ups</div>
+      <div class="sub">{total_signups} raw form submissions</div>
     </div>
     <div class="stat-card">
       <div class="label">Unsubscribes</div>
@@ -197,8 +197,8 @@ def build_dashboard(subscribers, index, unsub_count, total_signups) -> str:
     </div>
     <div class="stat-card">
       <div class="label">Retention Rate</div>
-      <div class="value">{"N/A" if total_signups == 0 else f"{round((active / total_signups) * 100)}%"}</div>
-      <div class="sub">active / total sign-ups</div>
+      <div class="value">{"N/A" if (active + unsub_count) == 0 else f"{round((active / (active + unsub_count)) * 100)}%"}</div>
+      <div class="sub">active / (active + unsubscribed)</div>
     </div>
   </div>
 
