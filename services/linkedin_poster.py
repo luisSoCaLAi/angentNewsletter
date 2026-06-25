@@ -8,6 +8,7 @@ Flow:
 """
 
 import os
+import sys
 import time
 import json
 import requests
@@ -53,7 +54,9 @@ class LinkedInPoster:
         token = self._get_valid_token()
         post_text = self._generate_post_copy(topics, newsletter_url)
         post_urn = self._post_to_linkedin(token, post_text)
-        print(f"   Copy preview:\n{self._indent(post_text)}")
+        enc = sys.stdout.encoding or "utf-8"
+        safe = self._indent(post_text).encode(enc, errors="replace").decode(enc)
+        print(f"   Copy preview:\n{safe}")
         return post_urn
 
     # ── Copy generation ─────────────────────────────────────────────────────
