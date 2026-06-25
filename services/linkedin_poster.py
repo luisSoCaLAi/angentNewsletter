@@ -151,7 +151,7 @@ Do NOT exceed 650 characters for the parts you write (the URL line is added sepa
 
     def _get_valid_token(self) -> str:
         load_dotenv(_ENV_PATH, override=True)
-        access_token = os.getenv("LINKEDIN_ACCESS_TOKEN", "")
+        access_token = os.getenv("LINKEDIN_ACCESS_TOKEN", "").strip()
         expiry_str = os.getenv("LINKEDIN_TOKEN_EXPIRY", "0")
 
         if not access_token:
