@@ -129,7 +129,7 @@ def run_full(args):
             from services.linkedin_poster import LinkedInPoster
             poster = LinkedInPoster()
             post_urn = poster.post_newsletter(topics, subject, newsletter_url)
-            print(f"   ✓ Posted (URN: {post_urn})\n")
+            print(f"   Posted (URN: {post_urn})\n")
         except Exception as e:
             print(f"   WARNING: LinkedIn post failed — {type(e).__name__}: {e}")
             traceback.print_exc()
@@ -355,7 +355,7 @@ def run_post_linkedin(date_str: str | None = None):
     poster = LinkedInPoster()
     try:
         post_urn = poster.post_newsletter(topics, subject, newsletter_url)
-        print(f"   ✓ Posted (URN: {post_urn})\n")
+        print(f"   Posted (URN: {post_urn})\n")
     except Exception as e:
         print(f"   ERROR: LinkedIn post failed — {type(e).__name__}: {e}")
         traceback.print_exc()

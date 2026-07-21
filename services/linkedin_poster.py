@@ -125,7 +125,7 @@ Do NOT exceed 650 characters for the parts you write (the URL line is added sepa
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
             "X-Restli-Protocol-Version": "2.0.0",
-            "LinkedIn-Version": "202506",
+            "LinkedIn-Version": "202606",
         }
         payload = {
             "author": author,
