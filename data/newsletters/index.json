@@ -1,5 +1,12 @@
 [
   {
+    "date": "2026-08-25",
+    "subject": "This week in AI: What matters for SMBs",
+    "sent_count": 8,
+    "is_test": false,
+    "filename": "2026-08-25.html"
+  },
+  {
     "date": "2026-08-18",
     "subject": "This week: AI agents reshaping SMB operations",
     "sent_count": 8,
